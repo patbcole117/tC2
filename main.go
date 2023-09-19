@@ -8,7 +8,6 @@ import (
 	"github.com/patbcole117/tC2/api"
 )
 
-
 func main() {
     rx := comms.NewHTTPCommRX("127.0.0.1", 8888)
     if err := rx.StartSrv(); err != nil {
