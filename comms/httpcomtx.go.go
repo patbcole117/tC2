@@ -15,7 +15,7 @@ func NewHTTPCommTX() HTTPCommTX {
     return HTTPCommTX{C: &http.Client{Timeout: CONN_TIMEOUT}}
 }
 
-func (tx *HTTPCommTX) SendJSON(msg interface{}, dst string)(*http.Response, error) {
+func (tx *HTTPCommTX) SendJSON(dst string, msg interface{})(*http.Response, error) {
     b, err := json.Marshal(msg)
     if err != nil {
         return nil, err

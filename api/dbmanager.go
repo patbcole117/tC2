@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/patbcole117/tC2/node"
+	"github.com/patbcole117/testC2/beacon"
+	"github.com/patbcole117/testC2/node"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,6 +33,7 @@ func NewDBManager() dbManager {
 
 	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", 
 		Value: 1}}).Err(); err != nil {
+		fmt.Println("[!] Ping failed.")
 		panic(err)
 	}
 	return dbManager{c: client}
@@ -47,6 +49,15 @@ func (db dbManager) DeleteNode(id int) (*mongo.DeleteResult, error) {
 		return nil, errors.New(fmt.Sprintf("no document with id %d", id))
 	}
 	return result, nil
+}
+
+func (db dbManager) InsertMsg(msg beacon.Msg) (*mongo.InsertOneResult, error) {
+	coll := db.c.Database("tinyC2").Collection("Messages")
+	res, err := coll.InsertOne(context.TODO(), msg)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (db dbManager) InsertNode(n node.Node) (*mongo.InsertOneResult, error) {
@@ -67,6 +78,20 @@ func (db dbManager) GetNode(id int) (*node.Node, error) {
 		return nil, err
 	}
 	return &n, nil
+}
+
+func (db dbManager) GetMsgs() ([]beacon.Msg, error) {
+	coll := db.c.Database("tinyC2").Collection("Messages")
+	cursor, err := coll.Find(context.TODO(), bson.D{})
+	if err != nil {
+		return nil, err
+	}
+
+	var msgs []beacon.Msg
+	if err = cursor.All(context.TODO(), &msgs); err != nil {
+		return nil, err
+	}
+	return msgs, nil
 }
 
 func (db dbManager) GetNodes() ([]node.Node, error) {

@@ -15,7 +15,7 @@ var (
 )
 
 type CommsPackageTX interface {
-    SendJSON(msg interface{}, dst string) (*http.Response, error)
+    SendJSON(dst string, msg interface{}) (*http.Response, error)
     Get(dst string) (*http.Response, error)
 }
 

@@ -5,19 +5,17 @@ import (
     "fmt"
     "io"
 	"net/http"
-    "strconv"
     "time"
 )
 
 type HTTPCommRX struct {
     Ip      string
-    Port    int
+    Port    string
     Srv       *http.Server
 }
-func NewHTTPCommRX(i string, p int) *HTTPCommRX {
+func NewHTTPCommRX(i, p string) *HTTPCommRX {
     rx := HTTPCommRX{Ip: i, Port: p}
-    srv := rx.ProvisionSrv()
-    rx.Srv = srv
+    rx.Srv = rx.ProvisionSrv()
     return &rx
 }
 
@@ -42,8 +40,7 @@ func (rx *HTTPCommRX) StopSrv() error {
 }
 
 func (rx *HTTPCommRX) GetAddy() string {
-    sPort := strconv.Itoa(rx.Port)
-    return (rx.Ip + ":" + sPort)
+    return (rx.Ip + ":" + rx.Port)
 }
 
 func (rx *HTTPCommRX) ProvisionSrv() *http.Server {
