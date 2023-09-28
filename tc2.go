@@ -43,6 +43,8 @@ func main() {
 		pstr_Ip			= flag.String("a", "", "a new ip to replace the old.")
 		pstr_Port		= flag.String("p", "", "a new port to replace the old.")
 		pstr_Name		= flag.String("n", "", "a new name to replace the old.")
+		pstr_To			= flag.String("t", "", "the To for a job")
+		pstr_Content	= flag.String("c", "", "the content for a job")
 	)
 	flag.Parse()
 
@@ -62,6 +64,8 @@ func main() {
 	switch *pstr_New{
 	case "node":
 		if err := NewNode(tx); err != nil{panic(err)}
+	case "job":
+		if err := NewJob(tx, *pstr_To, *pstr_Content); err != nil{panic(err)}
 	}
 
 	switch *pstr_Delete{
@@ -211,6 +215,40 @@ func NewNode(c comms.CommsPackageTX) error {
 	}
 	defer resp.Body.Close()
 	
+	if resp.StatusCode == http.StatusCreated {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		var prettyJson bytes.Buffer
+		if err := json.Indent(&prettyJson, body, "", "  "); err != nil {
+			panic(err)
+		}
+		fmt.Println(prettyJson.String())
+
+	} else {
+		_, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewJob(c comms.CommsPackageTX, t, ctx string) error {
+	url := "http://" + apiIp + ":" + apiPort + "/" + apiVer + "/j/new/"
+	body := map[string]string {
+		"to": t,
+		"content": ctx,
+	}
+	
+	resp, err := c.SendJSON(url, body)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode == http.StatusCreated {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
